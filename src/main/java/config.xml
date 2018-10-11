@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment/>
+    <entry key="server_ip">localhost</entry>
+    <entry key="server_port">9080</entry>
+    <!-- 测试值   -->
+
+    <!--
+    <entry key="server_resource_name">MobiCrowdsourcingTest</entry>
+    <entry key="database_schema">crowdframetest</entry>
+    -->
+
+    <!-- 运行值   -->
+
+    <entry key="server_resource_name">crowd_server-1.0-SNAPSHOT</entry>
+    <entry key="database_schema">crowdframedb</entry>
+
+    <entry key="database_ip">localhost</entry>
+    <entry key="database_port">3306</entry>
+    <entry key="database_account">root</entry>
+    <entry key="database_password">123</entry>
+</properties>

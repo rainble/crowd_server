@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="war" build-on-make="true" name="test_crowd_server:archive">
+    <output-path>$PROJECT_DIR$/out/artifacts/test_crowd_server_archive</output-path>
+    <root id="archive" name="test_crowd_server_archive.war">
+      <element id="artifact" artifact-name="crowd_server:war exploded" />
+      <element id="dir-copy" path="$USER_HOME$/Documents/CrowdFrame/server/WebContent" />
+    </root>
+  </artifact>
+</component>
