@@ -6,7 +6,6 @@ import fudan.mcd.vo.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,6 +124,10 @@ public class TestActionDAO {
 		actionVO = actionDAO.query(actionPK);
 		assertNull(actionVO);
 	}
+
+
+
+
 
 	@Test
 	public void testQueryByLocation() {

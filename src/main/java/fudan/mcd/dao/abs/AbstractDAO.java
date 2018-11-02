@@ -7,6 +7,7 @@ import javax.servlet.ServletContext;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 
 public abstract class AbstractDAO<PK, VO> implements IDAO<PK, VO> {
 	public static final String DEVELOP_CONFIG_PATH = "src/config.xml";
@@ -26,7 +27,7 @@ public abstract class AbstractDAO<PK, VO> implements IDAO<PK, VO> {
 
 	public AbstractDAO(ServletContext context) {
 //		this(String.format("%s/%s", context.getRealPath("/"), DEPLOY_CONFIG_PATH));
-		String ip = "localhost";
+		String ip = "120.79.72.242";
 		String port = "3306";
 		String schema = "crowdframedb";
 		URL = String.format("jdbc:mysql://%s:%s/%s?characterEncoding=utf8", ip, port, schema);
@@ -42,7 +43,7 @@ public abstract class AbstractDAO<PK, VO> implements IDAO<PK, VO> {
 //		URL = String.format("jdbc:mysql://%s:%s/%s?characterEncoding=utf8", ip, port, schema);
 //		USER = loader.load(ConfigParameter.DATABASE_ACCOUNT);
 //		PASSWORD = loader.load(ConfigParameter.DATABASE_PASSWORD);
-		String ip = "localhost";
+		String ip = "120.79.72.242";
 		String port = "3306";
 		String schema = "crowdframedb";
 		URL = String.format("jdbc:mysql://%s:%s/%s?characterEncoding=utf8", ip, port, schema);
@@ -56,7 +57,8 @@ public abstract class AbstractDAO<PK, VO> implements IDAO<PK, VO> {
 	 * @return 数据库连接
 	 */
 	protected Connection getConnection() {
-		try {
+//        (String.format("url is [ %s ] and user is [ %s ] and password is [ %s ]",URL, USER, PASSWORD));
+        try {
 			return DriverManager.getConnection(URL, USER, PASSWORD);
 		}
 		catch (SQLException e) {

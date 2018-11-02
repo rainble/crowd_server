@@ -27,7 +27,7 @@ public class PublishTaskService extends AbstractService {
 		task_pk = -1;
 	}
 
-	public int insertTask(TaskVO tvo) {
+	public Integer insertTask(TaskVO tvo) {
 		// DAO of the TaskVO
 		TaskDAO tDAO = new TaskDAO(context);
 		task_pk = tDAO.insert(tvo);
