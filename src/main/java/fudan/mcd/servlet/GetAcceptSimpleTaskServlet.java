@@ -58,11 +58,17 @@ public class GetAcceptSimpleTaskServlet extends HttpServlet {
         }
         responseBO.setSimpleTasks(simpleTasks);
 
+        /*
+        callback部分
+         */
+
+        String callback = "data";
+
         // Transform the responseBO to json string and output it
         responseData.setResult(1);
         responseData.setData(JSONUtils.toJSONString(responseBO));
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().println(JSONUtils.toJSONString(responseData));
+        response.getWriter().println(callback + "(" + JSONUtils.toJSONString(responseData) + ")");
     }
 
     public static class requestBO {

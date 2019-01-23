@@ -47,6 +47,11 @@ public class PublishSimpleTaskService extends AbstractService {
         return simpleTaskDAO.queryTaskListByUser(userId);
     }
 
+    public List<SimpleTaskVO> queryAllSimpleTask () {
+        SimpleTaskDAO simpleTaskDAO = new SimpleTaskDAO(context);
+        return simpleTaskDAO.queryAllTask();
+    }
+
 
 
 }

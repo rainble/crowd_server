@@ -1,0 +1,89 @@
+
+.StartEvent circle{
+    stroke: #333;
+    fill: #1ee901;
+    stroke-width: 1.5px;
+}
+
+.EndEvent circle{
+    stroke: #333;
+    fill: #e00001;
+    stroke-width: 6px;
+}
+
+
+.node rect{
+    stroke: #333;
+    fill: #80e680;
+    stroke-width: 1.5px;
+}
+
+.node polygon {
+    stroke: #333;
+    fill: #e37e7e;
+    stroke-width: 1.5px;
+}
+.ParallelGateway,.ExclusiveGateway{
+    opacity: 0.2 !important;
+}
+.ParallelGateway text {
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 2em;
+}
+
+.ExclusiveGateway text {
+    font-weight: bold;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 1.5em;
+}
+
+
+text {
+    font-weight: 300;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+}
+
+.edgePath path {
+    stroke: #333;
+    stroke-width: 1.5px;
+}
+
+@-webkit-keyframes flash {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+
+    25%, 75% {
+        opacity: 0.2;
+    }
+}
+
+@keyframes flash {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+
+    25%, 75% {
+        opacity: 0.2;
+    }
+}
+
+.warn {
+    -webkit-animation-duration: 5s;
+    animation-duration: 5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-iteration-count: 1;
+    animation-iteration-count: 1;
+}
+
+.warn {
+    -webkit-animation-name: flash;
+    animation-name: flash;
+}
+
+.completed{
+    opacity: 0.2 !important;
+}

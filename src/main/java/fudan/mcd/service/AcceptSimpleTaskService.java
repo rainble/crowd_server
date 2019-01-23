@@ -20,7 +20,7 @@ public class AcceptSimpleTaskService extends AbstractService {
     public int insert_task(int userId, int taskId) {
         AcceptSimpleTaskDAO acceptSimpleTaskDAO = new AcceptSimpleTaskDAO(context);
         int res = acceptSimpleTaskDAO.insert(userId, taskId);
-        if (res == 1) {
+        if (res != -3) {
             LOG.info(String.format("SimpltTask %d has been accepted successfully by %d.", taskId, userId));
             return res;
         } else {

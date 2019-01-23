@@ -2,9 +2,13 @@ package fudan.mcd.dao.impl;
 
 import fudan.mcd.dao.abs.AbstractAccepetSimpleTaskDAO;
 import fudan.mcd.dao.abs.AbstractSimpleTaskDAO;
+import fudan.mcd.utils.HttpRequestUtil;
 import fudan.mcd.vo.SimpleTaskVO;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +25,10 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
     public static final String FIELD_PUBLISH_TIME = "publishTime";
     public static final String TABLE_TARGET = "simpletask";
     public static final String FIELD_STATE = "taskState";
+    public static final String FIELD_CALLBACKURL = "callbackurl";
+
+    private static final Log LOG = LogFactory.getLog(AcceptSimpleTaskDAO.class);
+
 
 
     public AcceptSimpleTaskDAO(ServletContext context) {
@@ -104,21 +112,25 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
 
     public Integer insert(int userId, int taskId) {
 
-        String sql_insert = String.format("INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s) SELECT * FROM %s WHERE %s = ? AND %s = ?",
-                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_PUBLISH_TIME,FIELD_DURATION,
-                TABLE_TARGET, FIELD_ID, FIELD_TASK_ID);
-        String sql_drop = String.format("DELETE FROM %s WHERE %s = ? and %s = ?", TABLE_TARGET, FIELD_ID, FIELD_TASK_ID);
+        String sql_insert = String.format("INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s, %s) SELECT * FROM %s WHERE %s = ?",
+                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_PUBLISH_TIME,FIELD_DURATION, FIELD_CALLBACKURL,
+                TABLE_TARGET, FIELD_TASK_ID);
+        String sql_drop = String.format("DELETE FROM %s WHERE %s = ?", TABLE_TARGET, FIELD_TASK_ID);
+        String sql_update = String.format("UPDATE %s SET %s = ? WHERE %s = ?", TABLE_ACTION, FIELD_ID, FIELD_TASK_ID);
         PreparedStatement ps_insert = null;
         PreparedStatement ps_drop = null;
+        PreparedStatement ps_update = null;
         Connection connection = getConnection();
         try {
             ps_insert = connection.prepareStatement(sql_insert, Statement.RETURN_GENERATED_KEYS);
-            ps_insert.setInt(1, userId);
-            ps_insert.setInt(2, taskId);
+            ps_insert.setInt(1, taskId);
             ps_insert.executeUpdate();
+            ps_update = connection.prepareStatement(sql_update, Statement.RETURN_GENERATED_KEYS);
+            ps_update.setInt(1, userId);
+            ps_update.setInt(2, taskId);
+            ps_update.executeUpdate();
             ps_drop = connection.prepareStatement(sql_drop, Statement.RETURN_GENERATED_KEYS);
-            ps_drop.setInt(1, userId);
-            ps_drop.setInt(2, taskId);
+            ps_drop.setInt(1, taskId);
             ps_drop.executeUpdate();
             ResultSet rs = ps_insert.getGeneratedKeys();
             if (rs.next()) {
@@ -137,18 +149,33 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
 
     public int complete(int userId, int taskId) {
         String sql = String.format("UPDATE %s SET %s = ? WHERE %s = ? AND %s = ?", TABLE_ACTION, FIELD_STATE, FIELD_ID, FIELD_TASK_ID);
-        PreparedStatement ps = null;
+        String sqlSelect = String.format("SELECT %s FROM %s WHERE %s = ? AND %s = ?", FIELD_CALLBACKURL, TABLE_ACTION, FIELD_TASK_ID, FIELD_ID);
+        PreparedStatement psUpdate = null;
+        PreparedStatement psSelect = null;
         Connection connection = getConnection();
         try {
-            ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, 1);
-            ps.setInt(2, userId);
-            ps.setInt(3, taskId);
-            ps.executeUpdate();
-            ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);
+            psUpdate = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            psUpdate.setInt(1, 1);
+            psUpdate.setInt(2, userId);
+            psUpdate.setInt(3, taskId);
+            psUpdate.executeUpdate();
+            ResultSet rsUpdate = psUpdate.getGeneratedKeys();
+
+            psSelect = connection.prepareStatement(sqlSelect, Statement.RETURN_GENERATED_KEYS);
+            psSelect.setInt(1,taskId);
+            psSelect.setInt(2, userId);
+            psSelect.executeUpdate();
+            ResultSet rsSelect = psSelect.getGeneratedKeys();
+            String callback = rsSelect.getString(FIELD_CALLBACKURL);
+
+            String resutl = HttpRequestUtil.HTTPRequestDoGet(callback);
+            LOG.debug(String.format("Callback result from workflow engine is [ %s ]. ", resutl));
+
+
+
+            if (rsUpdate.next()) {
+                return rsUpdate.getInt(1);
+
             } else {
                 return -2;
             }

@@ -41,13 +41,18 @@ public class AcceptSimpleTaskServlet extends HttpServlet {
         int res = acceptSimpleTaskService.insert_task(userId, taskId);
 
         // Generate response data
+
+        /*
+        callback部分
+         */
+        String callback = "data";
+
         ServletResponseData responseData = new ServletResponseData();
         ResponseBO responseBO = new ResponseBO();
         responseData.setResult(res);
         responseData.setData(JSONUtils.toJSONString(responseBO));
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().println(JSONUtils.toJSONString(responseData));
-
+        response.getWriter().println(callback + "(" + JSONUtils.toJSONString(responseData) + ")");
     }
 
 

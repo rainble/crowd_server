@@ -2,6 +2,7 @@ package fudan.mcd.servlet;
 
 
 import fudan.mcd.service.AcceptSimpleTaskService;
+import fudan.mcd.utils.HttpRequestUtil;
 import fudan.mcd.utils.JSONUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,13 +40,20 @@ public class CompleteSimpleTaskServlet extends HttpServlet {
         AcceptSimpleTaskService acceptSimpleTaskService = new AcceptSimpleTaskService(getServletContext());
         int res = acceptSimpleTaskService.complete_task(userId, taskId);
 
+
+        /*
+        callback 部分
+         */
+        String callback = "data";
         // Generate response data
+
+
         ServletResponseData responseData = new ServletResponseData();
         responseBO responseBO = new responseBO();
         responseData.setResult(res);
         responseData.setData(JSONUtils.toJSONString(responseBO));
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().println(JSONUtils.toJSONString(responseData));
+        response.getWriter().println(callback + "(" + JSONUtils.toJSONString(responseData) + ")");
     }
 
     public static class requestBO {

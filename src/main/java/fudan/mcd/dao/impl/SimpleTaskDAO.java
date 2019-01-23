@@ -23,6 +23,7 @@ public class SimpleTaskDAO extends AbstractSimpleTaskDAO {
     public static final String FIELD_LOCATION_DESC = "locationDesc";
     public static final String FIELD_BONUS = "bonus";
     public static final String FIELD_PUBLISHTIME = "publishTime";
+    public static final String FIELD_CALLBACKURL = "callbackurl";
 
 
     @Override
@@ -60,8 +61,8 @@ public class SimpleTaskDAO extends AbstractSimpleTaskDAO {
 
     @Override
     public Integer insert(SimpleTaskVO simpleTaskVO) {
-        String sql = String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s) values(?, ?, ?, ?, ?, ?)",
-                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_DURATION);
+        String sql = String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) values(?, ?, ?, ?, ?, ?, ?)",
+                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_DURATION, FIELD_CALLBACKURL);
         PreparedStatement ps = null;
         Connection connection = getConnection();
         try {
@@ -72,6 +73,7 @@ public class SimpleTaskDAO extends AbstractSimpleTaskDAO {
             ps.setString(4, simpleTaskVO.getLocationDesc());
             ps.setInt(5, simpleTaskVO.getBonus());
             ps.setInt(6, simpleTaskVO.getDuration());
+            ps.setString(7, simpleTaskVO.getCallbackUrl());
 
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
@@ -96,6 +98,38 @@ public class SimpleTaskDAO extends AbstractSimpleTaskDAO {
                 e.printStackTrace();
             }
         }    }
+
+    public List<SimpleTaskVO> queryAllTask() {
+        String sql = String.format("SELECT * FROM %s", TABLE_ACTION);
+        PreparedStatement ps = null;
+        List<SimpleTaskVO> list = new ArrayList<SimpleTaskVO>();
+        Connection connection = getConnection();
+        try {
+            ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                SimpleTaskVO svo = loadFromResultSet(rs);
+                list.add(svo);
+            }
+            return list;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        finally {
+            try {
+                if (ps != null)
+                    ps.close();
+                if (connection != null)
+                    connection.close();
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     @Override
     public SimpleTaskVO delete(Integer integer) {

@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import fudan.mcd.vo.SimpleTaskVO;
+import io.netty.handler.codec.http.HttpUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -66,14 +67,14 @@ public class PublishSimpleTaskServlet extends HttpServlet{
         responseBO.setSimTaskId(simpleTaskVO.getTaskId());
         responseBO.setLog(req.getParameter("data"));
         responseBO.setDesc_test(simpleTaskVO.getTaskDesc());
-//
+
+
+
         responseData.setResult(result);
         responseData.setData(JSONUtils.toJSONString(responseBO));
         resp.setContentType("text/html;charset=UTF-8");
         resp.getWriter().println(JSONUtils.toJSONString(responseData));
-        LOG.info(String.format("The result of insert is [ %s ]", service.insertTask(simpleTaskVO)));
-//        HttpRequestUtil.HTTPRequestDoGet(simpleTaskVO.getCallbackUrl());
-//        LOG.debug(String.format("Callback result from workflow engine is [ %s ]. ", HttpRequestUtil.HTTPRequestDoGet(simpleTaskVO.getCallbackUrl())));
+        LOG.info(String.format("The result of insert is [ %s ]", result));
     }
 
 

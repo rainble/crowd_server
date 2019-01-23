@@ -24,24 +24,12 @@ public class GetSimpleTaskServlet extends HttpServlet {
     private static final Log LOG = LogFactory.getLog(GetSimpleTaskServlet.class);
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        doPost(request, response);
-    }
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        request.setCharacterEncoding("UTF-8");
-        int userId;
-        try {
-            String json = request.getParameter("data");
-            requestBO requestBO = JSONUtils.toBean(json, requestBO.class);
-            userId = requestBO.getUserId();
-        } catch (Exception e) {
-            String responseString = JSONUtils.toJSONString(ServletUtils.generateParseFailedData());
-            response.getOutputStream().println(responseString);
-            LOG.info(String.format("Receive acceptTask request [ parameter parse failed ] at [ %s ].", ServletUtils.getTime()));
-            return;
-        }
+
+        //关于callback的两句是为了前台ajax跨域请求用的，android端要用的话要删掉callback变量
+        String callback = request.getParameter("callback");
 
         PublishSimpleTaskService simpleTaskService = new PublishSimpleTaskService(getServletContext());
-        List<SimpleTaskVO> res = simpleTaskService.querySimpleTaskByUser(userId);
+        List<SimpleTaskVO> res = simpleTaskService.queryAllSimpleTask();
         List<SimpleTaskVO> simpleTaskVOList = new ArrayList<SimpleTaskVO>();
         for (SimpleTaskVO simpleTaskVO : res) {
             SimpleTaskVO simpleTaskVO1 = new SimpleTaskVO();
@@ -62,8 +50,11 @@ public class GetSimpleTaskServlet extends HttpServlet {
         responseBO.setSimpleTaskVOS(simpleTaskVOList);
         responseData.setData(JSONUtils.toJSONString(responseBO));
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().println(JSONUtils.toJSONString(responseData));
+        response.getWriter().println(callback + "(" + JSONUtils.toJSONString(responseData) + ")");
+    }
 
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        doGet(request, response);
     }
 
 
