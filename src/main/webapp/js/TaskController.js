@@ -61,7 +61,7 @@ function addNewTask() {
 
 function accept(userId, taskId) {
     $.ajax({
-        url: "http://localhost:8080/AcceptSimpleTaskServlet",
+        url: "http://localhost:8081/AcceptSimpleTaskServlet",
         type: "post",
         async: false,
         // contentType:"application/x-www-form-urlencoded",
@@ -133,7 +133,7 @@ function addMyTask(userId) {
 
 function complete(userId, taskId) {
     $.ajax({
-        url: "http://localhost:8080/CompleteSimpleTaskServlet",
+        url: "http://localhost:8081/CompleteSimpleTaskServlet",
         type: "post",
         async: false,
         data: "data={\"userId\":"+userId+",\"taskId\":"+taskId+"}",

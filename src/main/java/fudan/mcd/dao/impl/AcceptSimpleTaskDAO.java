@@ -112,8 +112,9 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
 
     public Integer insert(int userId, int taskId) {
 
+        // TODO: 2019-01-24 要把这句sql语句改成两句，而且不要用*，会有顺序问题
         String sql_insert = String.format("INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s, %s) SELECT * FROM %s WHERE %s = ?",
-                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_PUBLISH_TIME,FIELD_DURATION, FIELD_CALLBACKURL,
+                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_DURATION, FIELD_CALLBACKURL, FIELD_PUBLISH_TIME,
                 TABLE_TARGET, FIELD_TASK_ID);
         String sql_drop = String.format("DELETE FROM %s WHERE %s = ?", TABLE_TARGET, FIELD_TASK_ID);
         String sql_update = String.format("UPDATE %s SET %s = ? WHERE %s = ?", TABLE_ACTION, FIELD_ID, FIELD_TASK_ID);
@@ -155,7 +156,7 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
         Connection connection = getConnection();
         try {
             psUpdate = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            psUpdate.setInt(1, 1);
+            psUpdate.setInt(1, 2);
             psUpdate.setInt(2, userId);
             psUpdate.setInt(3, taskId);
             psUpdate.executeUpdate();
@@ -164,9 +165,16 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
             psSelect = connection.prepareStatement(sqlSelect, Statement.RETURN_GENERATED_KEYS);
             psSelect.setInt(1,taskId);
             psSelect.setInt(2, userId);
-            psSelect.executeUpdate();
-            ResultSet rsSelect = psSelect.getGeneratedKeys();
-            String callback = rsSelect.getString(FIELD_CALLBACKURL);
+            ResultSet rsSelect = psSelect.executeQuery();
+            String callback = null;
+            if (rsSelect.next())
+            {
+                int i =1;
+                int j  = i+23;
+            }
+
+
+            callback = rsSelect.getString(FIELD_CALLBACKURL);
 
             String resutl = HttpRequestUtil.HTTPRequestDoGet(callback);
             LOG.debug(String.format("Callback result from workflow engine is [ %s ]. ", resutl));
