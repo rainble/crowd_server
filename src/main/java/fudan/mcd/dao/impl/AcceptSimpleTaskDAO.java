@@ -2,6 +2,7 @@ package fudan.mcd.dao.impl;
 
 import fudan.mcd.dao.abs.AbstractAccepetSimpleTaskDAO;
 import fudan.mcd.dao.abs.AbstractSimpleTaskDAO;
+import fudan.mcd.servlet.PublishSimpleTaskServlet;
 import fudan.mcd.utils.HttpRequestUtil;
 import fudan.mcd.vo.SimpleTaskVO;
 import org.apache.commons.logging.Log;
@@ -134,6 +135,13 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
             ps_drop.setInt(1, taskId);
             ps_drop.executeUpdate();
             ResultSet rs = ps_insert.getGeneratedKeys();
+
+            String postPara = "serviceId=Human_Machine_Thing#2_GetCoffeeService&userId=" + userId + "&taskName=众包辅助接咖啡";
+            String res = PublishSimpleTaskServlet.sendPost(HttpRequestUtil.SendBPMNToBroker, postPara);
+
+            LOG.info(String.format("The result of send bpmn to broker is [ %s ]", res));
+
+
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
@@ -167,11 +175,6 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
             psSelect.setInt(2, userId);
             ResultSet rsSelect = psSelect.executeQuery();
             String callback = null;
-            if (rsSelect.next())
-            {
-                int i =1;
-                int j  = i+23;
-            }
 
 
             callback = rsSelect.getString(FIELD_CALLBACKURL);

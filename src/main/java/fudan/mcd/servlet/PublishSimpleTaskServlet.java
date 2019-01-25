@@ -9,12 +9,20 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import fudan.mcd.vo.SimpleTaskVO;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,7 +96,7 @@ public class PublishSimpleTaskServlet extends HttpServlet{
             simpleTaskVO.setDuration(Integer.parseInt(request.getParameter("duration")));
             simpleTaskVO.setLocationDesc(request.getParameter("locationDesc"));
             simpleTaskVO.setTaskDesc(request.getParameter("taskDesc"));
-            simpleTaskVO.setCallbackUrl(request.getParameter("url"));
+            simpleTaskVO.setCallbackUrl(request.getParameter("callbackUrl"));
         } catch (Exception e) {
             LOG.info(String.format("Receive publish task request [ parameter parse failed ] at [ %s ].", ServletUtils.getTime()));
             e.getStackTrace();
@@ -99,14 +107,14 @@ public class PublishSimpleTaskServlet extends HttpServlet{
         PublishSimpleTaskService service = new PublishSimpleTaskService(getServletContext());
         int result = service.insertTask(simpleTaskVO);
 
-        String SendMessageContent = "This task need you " + simpleTaskVO.getTaskDesc() +" at " + simpleTaskVO.getLocationDesc() + ", which is published bu user NO." +
+        String SendMessageContent = "This task description is [ " + simpleTaskVO.getTaskDesc() +"]  at [ " + simpleTaskVO.getLocationDesc() + " ], which is published bu user NO." +
                 simpleTaskVO.getUserId() + ". Bonus is " + simpleTaskVO.getBonus() + ". Publisher want you to finish this task in " + simpleTaskVO.getDuration() + " minutes. If you want to " +
                 "accept this task, click please.";
-        String AcceptTaskUrl = HttpRequestUtil.AcceptTask_URL + "?userId=" + simpleTaskVO.getUserId() + "&taskId=" + simpleTaskVO.getTaskId();
-        String SendMessagePara = "content=" + SendMessageContent + "&url=" + AcceptTaskUrl;
-        String SendMessageUrl = String.format("http://%s?%s", HttpRequestUtil.WXMessage_URL, SendMessagePara);
+        String AcceptTaskUrl = HttpRequestUtil.AcceptTask_URL + "?userId=" + simpleTaskVO.getUserId() + "%26taskId=" + simpleTaskVO.getTaskId();
+        String SendMessagePara = "content='" + SendMessageContent + "'&url=" + AcceptTaskUrl;
+//        String SendMessageUrl = String.format("http://%s?%s", HttpRequestUtil.WXMessage_URL, SendMessagePara);
         String res = null;
-        res = HttpRequestUtil.HTTPRequestDoGet(SendMessageUrl);
+        res = sendPost(HttpRequestUtil.WXMessage_URL, SendMessagePara);
         LOG.info(String.format("Send wechat message is [ %s ].", res));
 
         ServletResponseData responseData = new ServletResponseData();
@@ -114,7 +122,6 @@ public class PublishSimpleTaskServlet extends HttpServlet{
         responseBO.setSimTaskId(simpleTaskVO.getTaskId());
         responseBO.setLog(request.getParameter("data"));
         responseBO.setDesc_test(simpleTaskVO.getTaskDesc());
-
 
 
         responseData.setResult(result);
@@ -125,9 +132,6 @@ public class PublishSimpleTaskServlet extends HttpServlet{
 
 
     }
-
-
-
 
     public static class RequestBO {
 
@@ -227,4 +231,53 @@ public class PublishSimpleTaskServlet extends HttpServlet{
         }
     }
 
+    public static String sendPost(String url, String param) {
+        PrintWriter out = null;
+        BufferedReader in = null;
+        String result = "";
+        try {
+            URL realUrl = new URL(url);
+            // 打开和URL之间的连接
+            URLConnection conn = realUrl.openConnection();
+            // 设置通用的请求属性
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent",
+                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            // 发送POST请求必须设置如下两行
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            // 获取URLConnection对象对应的输出流
+            out = new PrintWriter(conn.getOutputStream());
+            // 发送请求参数
+            out.print(param);
+            // flush输出流的缓冲
+            out.flush();
+            // 定义BufferedReader输入流来读取URL的响应
+            in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result += line;
+            }
+        } catch (Exception e) {
+            System.out.println("发送 POST 请求出现异常！"+e);
+            e.printStackTrace();
+        }
+        //使用finally块来关闭输出流、输入流
+        finally{
+            try{
+                if(out!=null){
+                    out.close();
+                }
+                if(in!=null){
+                    in.close();
+                }
+            }
+            catch(IOException ex){
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }
 }

@@ -26,10 +26,10 @@ public class CompleteSimpleTaskServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         int userId, taskId;
         try {
-            String json = request.getParameter("data");
-            requestBO requestBO = JSONUtils.toBean(json, requestBO.class);
-            userId = requestBO.getUserId();
-            taskId = requestBO.getTaskId();
+//            String json = request.getParameter("data");
+//            requestBO requestBO = JSONUtils.toBean(json, requestBO.class);
+            userId = Integer.parseInt(request.getParameter("userId"));
+            taskId = Integer.parseInt(request.getParameter("taskId"));
         } catch (Exception e) {
             String responseString = JSONUtils.toJSONString(ServletUtils.generateParseFailedData());
             response.getOutputStream().println(responseString);

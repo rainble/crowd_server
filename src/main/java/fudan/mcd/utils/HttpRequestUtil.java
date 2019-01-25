@@ -21,8 +21,9 @@ public class HttpRequestUtil {
 	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
 	 */
 
-	public static final String WXMessage_URL = "192.168.1.168:8080/user/sendMessageToMPAll";
-	public static final String AcceptTask_URL = "localhost:8081/AcceptSimpleTaskServlet";
+	public static final String WXMessage_URL = "http://192.168.1.168:8080/user/sendMessageToMPAll";
+	public static final String SendBPMNToBroker = "http://192.168.1.168:8080/task/saveTaskByServiceIdAndUserId";
+	public static final String AcceptTask_URL = "192.168.1.168:8081/AcceptSimpleTaskServlet";
 
 
 	public static JSONObject httpRequest(String requestUrl, String requestMethod, String outputStr) {
