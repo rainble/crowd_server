@@ -34,64 +34,112 @@ public class PublishSimpleTaskServlet extends HttpServlet{
         doPost(req, resp);
     }
 
+//    @Override
+//    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        req.setCharacterEncoding("UTF-8");
+//        RequestBO requestBO;
+//        SimpleTaskVO simpleTaskVO = new SimpleTaskVO();
+//        try {
+//            String jsonString = req.getParameter("data");
+//            System.out.print(jsonString);
+//            requestBO = JSONUtils.toBean(jsonString, RequestBO.class);
+//            LOG.info(String.format("User [ %s ] request to publish task request at [ %s ].", requestBO.getUserId(), ServletUtils.getTime()));
+//            // Set the info of TaskVO
+//            simpleTaskVO.setUserId(Integer.parseInt(requestBO.getUserId()));
+//            simpleTaskVO.setTaskId(Integer.parseInt(requestBO.getTaskId()));
+//            simpleTaskVO.setTaskDesc((requestBO.getTaskDesc()));
+//            simpleTaskVO.setBonus(Integer.parseInt(requestBO.getBonus()));
+//            simpleTaskVO.setDuration(Integer.parseInt(requestBO.getDuration()));
+//            simpleTaskVO.setLocationDesc(requestBO.getLocationDesc());
+//            simpleTaskVO.setCallbackUrl(requestBO.getUrl());
+//        }catch (Exception e){
+//            String responseString = JSONUtils.toJSONString(ServletUtils.generateParseFailedData());
+//            resp.getOutputStream().println(responseString);
+//            LOG.info(String.format("Receive publish task request [ parameter parse failed ] at [ %s ].", ServletUtils.getTime()));
+//            return;
+//        }
+//
+//        PublishSimpleTaskService service = new PublishSimpleTaskService(getServletContext());
+//
+//        int result = service.insertTask(simpleTaskVO);
+//        ServletResponseData responseData = new ServletResponseData();
+//        ResponseBO responseBO = new ResponseBO();
+//        responseBO.setSimTaskId(simpleTaskVO.getTaskId());
+//        responseBO.setLog(req.getParameter("data"));
+//        responseBO.setDesc_test(simpleTaskVO.getTaskDesc());
+//
+//
+//
+//        responseData.setResult(result);
+//        responseData.setData(JSONUtils.toJSONString(responseBO));
+//        resp.setContentType("text/html;charset=UTF-8");
+//        resp.getWriter().println(JSONUtils.toJSONString(responseData));
+//        LOG.info(String.format("The result of insert is [ %s ]", result));
+//    }
+
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8");
-        RequestBO requestBO;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         SimpleTaskVO simpleTaskVO = new SimpleTaskVO();
+
         try {
-            String jsonString = req.getParameter("data");
-            System.out.print(jsonString);
-            requestBO = JSONUtils.toBean(jsonString, RequestBO.class);
-            LOG.info(String.format("User [ %d ] request to publish task request at [ %s ].", requestBO.getUserId(), ServletUtils.getTime()));
-            // Set the info of TaskVO
-            simpleTaskVO.setUserId(requestBO.getUserId());
-            simpleTaskVO.setTaskId(requestBO.getTaskId());
-            simpleTaskVO.setTaskDesc(requestBO.getTaskDesc());
-            simpleTaskVO.setBonus(requestBO.getBonus());
-            simpleTaskVO.setDuration(requestBO.getDuration());
-            simpleTaskVO.setLocationDesc(requestBO.getLocationDesc());
-            simpleTaskVO.setCallbackUrl(requestBO.getUrl());
-        }catch (Exception e){
-            String responseString = JSONUtils.toJSONString(ServletUtils.generateParseFailedData());
-            resp.getOutputStream().println(responseString);
+            simpleTaskVO.setUserId(Integer.parseInt(request.getParameter("userId")));
+            simpleTaskVO.setTaskId(Integer.parseInt(request.getParameter("taskId")));
+            simpleTaskVO.setBonus(Integer.parseInt(request.getParameter("bonus")));
+            simpleTaskVO.setDuration(Integer.parseInt(request.getParameter("duration")));
+            simpleTaskVO.setLocationDesc(request.getParameter("locationDesc"));
+            simpleTaskVO.setTaskDesc(request.getParameter("taskDesc"));
+            simpleTaskVO.setCallbackUrl(request.getParameter("url"));
+        } catch (Exception e) {
             LOG.info(String.format("Receive publish task request [ parameter parse failed ] at [ %s ].", ServletUtils.getTime()));
+            e.getStackTrace();
             return;
         }
 
-        PublishSimpleTaskService service = new PublishSimpleTaskService(getServletContext());
 
+        PublishSimpleTaskService service = new PublishSimpleTaskService(getServletContext());
         int result = service.insertTask(simpleTaskVO);
+
+        String SendMessageContent = "This task need you " + simpleTaskVO.getTaskDesc() +" at " + simpleTaskVO.getLocationDesc() + ", which is published bu user NO." +
+                simpleTaskVO.getUserId() + ". Bonus is " + simpleTaskVO.getBonus() + ". Publisher want you to finish this task in " + simpleTaskVO.getDuration() + " minutes. If you want to " +
+                "accept this task, click please.";
+        String AcceptTaskUrl = HttpRequestUtil.AcceptTask_URL + "?userId=" + simpleTaskVO.getUserId() + "&taskId=" + simpleTaskVO.getTaskId();
+        String SendMessagePara = "content=" + SendMessageContent + "&url=" + AcceptTaskUrl;
+        String SendMessageUrl = String.format("http://%s?%s", HttpRequestUtil.WXMessage_URL, SendMessagePara);
+        String res = null;
+        res = HttpRequestUtil.HTTPRequestDoGet(SendMessageUrl);
+        LOG.info(String.format("Send wechat message is [ %s ].", res));
+
         ServletResponseData responseData = new ServletResponseData();
         ResponseBO responseBO = new ResponseBO();
         responseBO.setSimTaskId(simpleTaskVO.getTaskId());
-        responseBO.setLog(req.getParameter("data"));
+        responseBO.setLog(request.getParameter("data"));
         responseBO.setDesc_test(simpleTaskVO.getTaskDesc());
 
 
 
         responseData.setResult(result);
         responseData.setData(JSONUtils.toJSONString(responseBO));
-        resp.setContentType("text/html;charset=UTF-8");
-        resp.getWriter().println(JSONUtils.toJSONString(responseData));
+        response.setContentType("text/html;charset=UTF-8");
+        response.getWriter().println(JSONUtils.toJSONString(responseData));
         LOG.info(String.format("The result of insert is [ %s ]", result));
-    }
 
+
+    }
 
 
 
 
     public static class RequestBO {
 
-        private int userId;
+        private String userId;
         private String taskDesc;
         private String locationDesc;
-        private int duration;
-        private int bonus;
+        private String duration;
+        private String bonus;
         private String url;
-        private int taskId;
+        private String taskId;
 
-        public void setUserId(int userId) {
+        public void setUserId(String userId) {
             this.userId = userId;
         }
 
@@ -103,11 +151,11 @@ public class PublishSimpleTaskServlet extends HttpServlet{
             this.locationDesc = locationDesc;
         }
 
-        public void setDuration(int duration) {
+        public void setDuration(String duration) {
             this.duration = duration;
         }
 
-        public void setBonus(int bonus) {
+        public void setBonus(String bonus) {
             this.bonus = bonus;
         }
 
@@ -115,19 +163,19 @@ public class PublishSimpleTaskServlet extends HttpServlet{
             this.url = url;
         }
 
-        public void setTaskId(int taskId) {
+        public void setTaskId(String taskId) {
             this.taskId = taskId;
         }
 
-        public int getTaskId() {
+        public String getTaskId() {
             return taskId;
         }
 
-        public int getDuration() {
+        public String getDuration() {
             return duration;
         }
 
-        public int getBonus() {
+        public String getBonus() {
             return bonus;
         }
 
@@ -139,7 +187,7 @@ public class PublishSimpleTaskServlet extends HttpServlet{
             return locationDesc;
         }
 
-        public int getUserId() {
+        public String getUserId() {
             return userId;
         }
 
