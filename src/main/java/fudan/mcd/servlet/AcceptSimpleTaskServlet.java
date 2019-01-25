@@ -55,7 +55,7 @@ public class AcceptSimpleTaskServlet extends HttpServlet {
         responseData.setResult(res);
         responseData.setData(JSONUtils.toJSONString(responseBO));
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().println(callback + "(" + JSONUtils.toJSONString(responseData) + ")");
+        response.getWriter().println(callback + "(" + JSONUtils.toJSONString(responseData) + ")" + ", 您已接受该任务。");
     }
 
 

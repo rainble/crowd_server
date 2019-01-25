@@ -25,7 +25,8 @@
     <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
     <![endif]-->
 
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <%--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>--%>
+    <script src="js/jquery-2.0.3.min.js"></script>
 
     <script src="js/TaskController.js"></script>
     <script src="js/d3.min.js"></script>
@@ -129,6 +130,8 @@
         </tbody>
     </table>
 </div>
+
+
 
 
 <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
