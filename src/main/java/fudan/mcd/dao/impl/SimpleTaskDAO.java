@@ -18,6 +18,7 @@ public class SimpleTaskDAO extends AbstractSimpleTaskDAO {
     public static final String TABLE_ACTION = "simpletask";
     public static final String FIELD_ID = "userId";
     public static final String FIELD_TASK_ID = "taskId";
+    public static final String FIELD_MAX_TASK_ID = "max(taskId)";
     public static final String FIELD_TASK_DESC = "taskDesc";
     public static final String FIELD_DURATION = "duration";
     public static final String FIELD_LOCATION_DESC = "locationDesc";
@@ -61,22 +62,46 @@ public class SimpleTaskDAO extends AbstractSimpleTaskDAO {
 
     @Override
     public Integer insert(SimpleTaskVO simpleTaskVO) {
-        String sql = String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) values(?, ?, ?, ?, ?, ?, ?)",
-                TABLE_ACTION, FIELD_ID, FIELD_TASK_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_DURATION, FIELD_CALLBACKURL);
+        String sql = String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s) values(?, ?, ?, ?, ?, ?)",
+                TABLE_ACTION, FIELD_ID, FIELD_TASK_DESC, FIELD_LOCATION_DESC, FIELD_BONUS, FIELD_DURATION, FIELD_CALLBACKURL);
         PreparedStatement ps = null;
+        String sql_select = String.format("SELECT MAX(%s) FROM %s", FIELD_TASK_ID, TABLE_ACTION);
+        PreparedStatement ps_select = null;
         Connection connection = getConnection();
         try {
             ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, simpleTaskVO.getUserId());
-            ps.setInt(2, simpleTaskVO.getTaskId());
-            ps.setString(3, simpleTaskVO.getTaskDesc());
-            ps.setString(4, simpleTaskVO.getLocationDesc());
-            ps.setInt(5, simpleTaskVO.getBonus());
-            ps.setInt(6, simpleTaskVO.getDuration());
-            ps.setString(7, simpleTaskVO.getCallbackUrl());
-
+            ps.setString(2, simpleTaskVO.getTaskDesc());
+            ps.setString(3, simpleTaskVO.getLocationDesc());
+            ps.setInt(4, simpleTaskVO.getBonus());
+            ps.setInt(5, simpleTaskVO.getDuration());
+            ps.setString(6, simpleTaskVO.getCallbackUrl());
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
+
+            ps_select = connection.prepareStatement(sql_select, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs_select = ps_select.executeQuery();
+
+//            if (rs_select.next()) {
+//                int tmp = rs_select.findColumn(FIELD_TASK_ID);
+//            }
+            if (rs_select.next()) {
+                int taskId = rs_select.getInt(FIELD_MAX_TASK_ID);
+                simpleTaskVO.setTaskId(taskId);
+            }
+
+
+
+//            psSelect = connection.prepareStatement(sqlSelectForCallback, Statement.RETURN_GENERATED_KEYS);
+//            ResultSet rsSelect = psSelect.executeQuery();
+//            String callback = null;
+//
+//            callback = rsSelect.getString(FIELD_CALLBACKURL);
+//
+
+
+
+
             if (rs.next()) {
                 return rs.getInt(1);
             } else {

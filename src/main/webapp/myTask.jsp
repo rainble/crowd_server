@@ -11,6 +11,8 @@
     String userId = request.getParameter("userId");
 %>
 <html lang="zh-CN">
+<%--这个文件已经乱了，不能用了
+回来再说吧--%>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -32,6 +34,7 @@
     <script src="js/TaskController.js"></script>
 
     <script>
+        var serviceName, serviceTitle;
         function getProcess() {
             console.log(12355);
             $.ajax({
@@ -49,12 +52,17 @@
                     console.log(json.toString());
                     for (var i in json) {
                         console.log(json[i].serviceName);
+                        $("#detail-panel").append("<div class='radio'><label><input type='radio' name='optionsRadios' id='optionsRadios1' value='"+json[i].serviceName+"' checked>" +
+                            "This service's name is [ "+json[i].serviceName+" ], you can user this service to [ "+json[i].serviceTitle+" ].</label></div>  ")
+                    }
+                    function sendBPMN() {
+                        var id = $("input[name='optionsRadios']:checked").val();
                         $.ajax({
                             url: "http://localhost:8080/task/saveTaskByServiceIdAndUserId",
                             type: "post",
                             async: false,
                             // data:{"serviceId":json[i].serviceName,"userId":5,"taskName":json[i].serviceTitle},
-                            data:"serviceId="+json[i].serviceName+"&&userId=5&&taskName="+json[i].serviceTitle+"",
+                            data:"serviceId="+id+"&&userId=5&&taskName="+json[i].serviceTitle+"",
                             error: function (xhr, status, errorThrown) {
                                 console.log("Error: " + errorThrown);
                                 console.log("Status: " + status);
@@ -63,11 +71,10 @@
                             success: function (jsonn) {
                                 var arr = jsonn.split("=");
                                 console.log(arr[1]);
-                                $("#detail-panel").append("<div class='radio'><label><input type='radio' name='optionsRadios' id='optionsRadios1' value='"+arr[1]+"' checked>" +
-                                    "This service's name is [ "+json[i].serviceName+" ], you can user this service to [ "+json[i].serviceTitle+" ].</label></div>  ")
                             }
                         });
                     }
+
                 }
             });
         }
@@ -196,12 +203,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="jump()">Confirm</button>
+                <button type="button" class="btn btn-primary" onclick="sendBPMN()">Confirm</button>
                 <script>
-                    function jump() {
-                        var id = $("input[name='optionsRadios']:checked").val();
-                        window.location='TaskDisplay.jsp?taskId='+id+'';
-                    }
+
 
                 </script>
             </div>

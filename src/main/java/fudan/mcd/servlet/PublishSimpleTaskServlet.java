@@ -18,6 +18,7 @@ import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +92,6 @@ public class PublishSimpleTaskServlet extends HttpServlet{
 
         try {
             simpleTaskVO.setUserId(Integer.parseInt(request.getParameter("userId")));
-            simpleTaskVO.setTaskId(Integer.parseInt(request.getParameter("taskId")));
             simpleTaskVO.setBonus(Integer.parseInt(request.getParameter("bonus")));
             simpleTaskVO.setDuration(Integer.parseInt(request.getParameter("duration")));
             simpleTaskVO.setLocationDesc(request.getParameter("locationDesc"));
@@ -103,15 +103,20 @@ public class PublishSimpleTaskServlet extends HttpServlet{
             return;
         }
 
-
         PublishSimpleTaskService service = new PublishSimpleTaskService(getServletContext());
         int result = service.insertTask(simpleTaskVO);
 
         String SendMessageContent = "This task description is [ " + simpleTaskVO.getTaskDesc() +"]  at [ " + simpleTaskVO.getLocationDesc() + " ], which is published bu user NO." +
                 simpleTaskVO.getUserId() + ". Bonus is " + simpleTaskVO.getBonus() + ". Publisher want you to finish this task in " + simpleTaskVO.getDuration() + " minutes. If you want to " +
                 "accept this task, click please.";
-        String AcceptTaskUrl = HttpRequestUtil.AcceptTask_URL + "?userId=" + simpleTaskVO.getUserId() + "%26taskId=" + simpleTaskVO.getTaskId();
-        String SendMessagePara = "content='" + SendMessageContent + "'&url=" + AcceptTaskUrl;
+//        String AcceptTaskUrl = HttpRequestUtil.AcceptTask_URL + "?userId=" + simpleTaskVO.getUserId() + "%26taskId=" + simpleTaskVO.getTaskId();
+        String AcceptTaskUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?";
+        String AcceptTaskUrlPara = "appid=wxcb6063d8a90280c6%26redirect_uri=http%3A%2F%2Fwww.fudanse.club%2Fwm%2Fwx%2Fredirect%2Fwxcb6063d8a90280c6%2FAcceptTask" + simpleTaskVO.getTaskId() + "%26response_type=code%26scope=snsapi_userinfo%26state=%26connect_redirect=1#wechat_redirect\"";
+//        Map<String, String> AcceptTaskUrlPara = new HashMap<String, String>();
+//        AcceptTaskUrlPara.put("appid", "wxcb6063d8a90280c6");
+//        AcceptTaskUrlPara.put("redirect_uri", "http%3A%2F%2Fwww.fudanse.club%2Fwm%2Fwx%2Fredirect%2Fwxcb6063d8a90280c6%2FAcceptTask" + simpleTaskVO.getTaskId() + "%26response_type=code%26scope=snsapi_userinfo%26state=%26connect_redirect=1#wechat_redirect");
+
+        String SendMessagePara = "content='" + SendMessageContent + "'&url=" + AcceptTaskUrl + AcceptTaskUrlPara;
 //        String SendMessageUrl = String.format("http://%s?%s", HttpRequestUtil.WXMessage_URL, SendMessagePara);
         String res = null;
         res = sendPost(HttpRequestUtil.WXMessage_URL, SendMessagePara);

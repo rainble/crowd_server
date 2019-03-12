@@ -32,7 +32,14 @@ public class AcceptSimpleTaskService extends AbstractService {
 
     public int complete_task(int userId, int taskId) {
         AcceptSimpleTaskDAO dao = new AcceptSimpleTaskDAO(context);
-        return dao.complete(userId, taskId);
+        int res = dao.complete(userId, taskId);
+        if (res != -3) {
+            LOG.info(String.format("SimpleTask [ %d ] has been completed successfully by [ %d ]", taskId, userId));
+            return res;
+        } else {
+            LOG.info(String.format("SimpltTask %d has been completed abortively by %d.", taskId, userId));
+            return res;
+        }
     }
 
     public List<SimpleTaskVO> queryAcceptSimpleTaskListByUser(int userId) {

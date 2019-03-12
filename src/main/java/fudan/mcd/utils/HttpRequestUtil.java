@@ -22,7 +22,7 @@ public class HttpRequestUtil {
 	 */
 
 	public static final String WXMessage_URL = "http://192.168.1.168:8080/user/sendMessageToMPAll";
-	public static final String SendBPMNToBroker = "http://192.168.1.168:8080/task/saveTaskByServiceIdAndUserId";
+	public static final String SendBPMNToBroker = "http://192.168.1.168:8080/task/saveCrowdByServiceIdAndUserId";
 	public static final String AcceptTask_URL = "192.168.1.168:8081/AcceptSimpleTaskServlet";
 
 

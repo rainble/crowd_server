@@ -73,7 +73,24 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
             }
         }
     }
-
+    public SimpleTaskVO queryAcceptTaskByTaskId(int taskId) {
+        String sql = String.format("SELECT * FROM %s WHERE %s = ?", TABLE_ACTION, FIELD_TASK_ID);
+        SimpleTaskVO res = new SimpleTaskVO();
+        PreparedStatement ps = null;
+        Connection connection = getConnection();
+        try{
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, taskId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                res = loadFromResultSet(rs);
+            }
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return res;
+        }
+    }
     @Override
     public List<SimpleTaskVO> queryCompleteTaskListByUser(int userId) {
         String sql = String.format("SELECT * FROM %s WHERE %s = ? AND %s = ?", TABLE_ACTION, FIELD_ID, FIELD_STATE);
@@ -123,10 +140,14 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
         PreparedStatement ps_drop = null;
         PreparedStatement ps_update = null;
         Connection connection = getConnection();
+
+        int count = 0;
+
         try {
             ps_insert = connection.prepareStatement(sql_insert, Statement.RETURN_GENERATED_KEYS);
             ps_insert.setInt(1, taskId);
             ps_insert.executeUpdate();
+            SimpleTaskVO tmp = queryAcceptTaskByTaskId(taskId);
             ps_update = connection.prepareStatement(sql_update, Statement.RETURN_GENERATED_KEYS);
             ps_update.setInt(1, userId);
             ps_update.setInt(2, taskId);
@@ -136,9 +157,11 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
             ps_drop.executeUpdate();
             ResultSet rs = ps_insert.getGeneratedKeys();
 
-            String postPara = "serviceId=Human_Machine_Thing#2_GetCoffeeService&userId=" + userId + "&taskName=众包辅助接咖啡";
+            String postPara = "serviceId=Human_Machine_Thing#2_GetCoffeeService&userId=" + tmp.getUserId() + "&workerId="+ userId + "&taskId=" + taskId +"&taskName=众包辅助接咖啡";
             String res = PublishSimpleTaskServlet.sendPost(HttpRequestUtil.SendBPMNToBroker, postPara);
+            count++;
 
+            LOG.info(String.format("The parameters ara userId = [ %d ] and workerId = [ %d ] for [ %d ] times", tmp.getUserId(), userId, count));
             LOG.info(String.format("The result of send bpmn to broker is [ %s ]", res));
 
 
@@ -156,9 +179,9 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
     }
 
 
-    public int complete(int userId, int taskId) {
+    public Integer complete(int userId, int taskId) {
         String sql = String.format("UPDATE %s SET %s = ? WHERE %s = ? AND %s = ?", TABLE_ACTION, FIELD_STATE, FIELD_ID, FIELD_TASK_ID);
-        String sqlSelect = String.format("SELECT %s FROM %s WHERE %s = ? AND %s = ?", FIELD_CALLBACKURL, TABLE_ACTION, FIELD_TASK_ID, FIELD_ID);
+        String sqlSelectForCallback = String.format("SELECT %s FROM %s WHERE %s = ? AND %s = ?", FIELD_CALLBACKURL, TABLE_ACTION, FIELD_TASK_ID, FIELD_ID);
         PreparedStatement psUpdate = null;
         PreparedStatement psSelect = null;
         Connection connection = getConnection();
@@ -170,17 +193,24 @@ public class AcceptSimpleTaskDAO extends AbstractAccepetSimpleTaskDAO {
             psUpdate.executeUpdate();
             ResultSet rsUpdate = psUpdate.getGeneratedKeys();
 
-            psSelect = connection.prepareStatement(sqlSelect, Statement.RETURN_GENERATED_KEYS);
+            psSelect = connection.prepareStatement(sqlSelectForCallback, Statement.RETURN_GENERATED_KEYS);
             psSelect.setInt(1,taskId);
             psSelect.setInt(2, userId);
             ResultSet rsSelect = psSelect.executeQuery();
             String callback = null;
 
+            // TODO: 2019-03-11 为什么getString(FIELD_CALLBACK)得不到callback数据？
+            if (rsSelect.next()) {
+                callback = rsSelect.getString(1);
+            }
 
-            callback = rsSelect.getString(FIELD_CALLBACKURL);
+            String resutl = "";
 
-            String resutl = HttpRequestUtil.HTTPRequestDoGet(callback);
-            LOG.debug(String.format("Callback result from workflow engine is [ %s ]. ", resutl));
+            if (!callback.isEmpty()) {
+                resutl = HttpRequestUtil.HTTPRequestDoGet(callback);
+
+            }
+            LOG.info(String.format("Callback result from workflow engine is [ %s ]. ", resutl.toString()));
 
 
 
